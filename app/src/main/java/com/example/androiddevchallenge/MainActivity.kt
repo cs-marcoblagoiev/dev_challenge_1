@@ -20,6 +20,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -57,9 +58,16 @@ fun ImageList() {
     val doggoList: MutableList<Doggo> = ArrayList()
     doggoList.add(Doggo("Cookie", 2, "https://i.imgur.com/oo67PIH.jpg", "Pizza"))
     doggoList.add(Doggo("Bandit", 1, "https://i.imgur.com/jl4Oje0.jpg", "Hamburgers"))
+    doggoList.add(Doggo("Lucky", 1, "https://i.imgur.com/kzTTvMI.jpeg", "All treats"))
+    doggoList.add(Doggo("Peanut", 4, "https://i.imgur.com/7S3NAHs.jpeg", "Bones"))
+    doggoList.add(Doggo("Thor", 5, "https://i.imgur.com/Gg4jxJ3.jpeg", "Meatballs"))
+    doggoList.add(Doggo("Ella", 3, "https://i.imgur.com/LI44M9n.jpeg", "Watermelon"))
+    doggoList.add(Doggo("Brutus", 1, "https://i.imgur.com/G4byIo1.jpeg", "Bananas"))
+    doggoList.add(Doggo("Minnie", 1, "https://i.imgur.com/VaA1YdA.jpeg", "Peanut butter"))
+    doggoList.add(Doggo("Noodles", 2, "https://i.imgur.com/ZV5kWcf.jpeg", "Noodles"))
 
-    Column(Modifier.fillMaxWidth()) {
-        doggoList.forEach { doggo ->
+    LazyColumn(Modifier.fillMaxWidth()) {
+        items(doggoList) { doggo ->
             ImageListItem(doggo = doggo)
         }
     }
@@ -71,10 +79,11 @@ fun ImageListItem(doggo: Doggo) {
         CoilImage(
             data = doggo.photo,
             contentDescription = doggo.name,
-            modifier = Modifier.size(100.dp)
+            modifier = Modifier.size(100.dp).padding(6.dp),
+            fadeIn = true
         )
         Spacer(Modifier.width(10.dp))
-        Text(doggo.name, style = MaterialTheme.typography.h3)
+        Text(doggo.name, style = MaterialTheme.typography.h4)
     }
 }
 

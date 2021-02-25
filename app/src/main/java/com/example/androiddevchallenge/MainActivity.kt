@@ -18,10 +18,12 @@ package com.example.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -30,6 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.*
 import com.example.androiddevchallenge.ui.theme.MyTheme
 import dev.chrisbanes.accompanist.coil.CoilImage
 
@@ -47,43 +52,91 @@ class MainActivity : AppCompatActivity() {
 // Start building your app here!
 @Composable
 fun MyApp() {
-    ImageList()
+    val navController = rememberNavController()
+    val manager = DoggoManager()
+    NavHost(navController, startDestination = "list") {
+        composable("list") { ImageList(navHostController = navController, manager = manager) }
+
+        composable(
+            "details/{id}",
+            arguments = listOf(navArgument("id") {
+                type = NavType.IntType
+                defaultValue = 0
+            })
+        ) { backStackEntry ->
+            DoggoDetails(manager = manager, id = backStackEntry.arguments?.getInt("id")!!)
+        }
+
+
+    }
 }
 
 @Composable
-fun ImageList() {
-    // We save the scrolling position with this state
-    val scrollState = rememberLazyListState()
-
-    val doggoList: MutableList<Doggo> = ArrayList()
-    doggoList.add(Doggo("Cookie", 2, "https://i.imgur.com/oo67PIH.jpg", "Pizza"))
-    doggoList.add(Doggo("Bandit", 1, "https://i.imgur.com/jl4Oje0.jpg", "Hamburgers"))
-    doggoList.add(Doggo("Lucky", 1, "https://i.imgur.com/kzTTvMI.jpeg", "All treats"))
-    doggoList.add(Doggo("Peanut", 4, "https://i.imgur.com/7S3NAHs.jpeg", "Bones"))
-    doggoList.add(Doggo("Thor", 5, "https://i.imgur.com/Gg4jxJ3.jpeg", "Meatballs"))
-    doggoList.add(Doggo("Ella", 3, "https://i.imgur.com/LI44M9n.jpeg", "Watermelon"))
-    doggoList.add(Doggo("Brutus", 1, "https://i.imgur.com/G4byIo1.jpeg", "Bananas"))
-    doggoList.add(Doggo("Minnie", 1, "https://i.imgur.com/VaA1YdA.jpeg", "Peanut butter"))
-    doggoList.add(Doggo("Noodles", 2, "https://i.imgur.com/ZV5kWcf.jpeg", "Noodles"))
+fun ImageList(navHostController: NavHostController, manager: DoggoManager) {
+    val doggoList = manager.getAllDoggos()
 
     LazyColumn(Modifier.fillMaxWidth()) {
         items(doggoList) { doggo ->
-            ImageListItem(doggo = doggo)
+            ImageListItem(doggo = doggo, navHostController = navHostController)
         }
     }
 }
 
 @Composable
-fun ImageListItem(doggo: Doggo) {
+fun ImageListItem(doggo: Doggo, navHostController: NavHostController) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         CoilImage(
             data = doggo.photo,
             contentDescription = doggo.name,
-            modifier = Modifier.size(100.dp).padding(6.dp),
+            modifier = Modifier
+                .size(100.dp)
+                .padding(6.dp)
+                .clickable(onClick = { navHostController.navigate("details/${doggo.id}") }),
             fadeIn = true
         )
         Spacer(Modifier.width(10.dp))
         Text(doggo.name, style = MaterialTheme.typography.h4)
+    }
+}
+
+@Composable
+fun DoggoDetails(manager: DoggoManager, id: Int) {
+    val doggo = manager.getDoggoById(id)
+
+    Column {
+        CoilImage(
+            data = doggo.photo,
+            contentDescription = doggo.name,
+            modifier = Modifier
+                .size(300.dp)
+                .padding(16.dp),
+            fadeIn = true
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = doggo.name,
+            style = MaterialTheme.typography.h3,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "Age: ${doggo.age}",
+            style = MaterialTheme.typography.body1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "Favorite snack: ${doggo.favoriteSnacks}",
+            style = MaterialTheme.typography.body1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+        )
+        Spacer(Modifier.height(10.dp))
     }
 }
 
